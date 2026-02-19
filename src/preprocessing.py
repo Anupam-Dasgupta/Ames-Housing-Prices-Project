@@ -1,124 +1,149 @@
-import numpy as np
+# %%
 import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
-from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 from sklearn.pipeline import Pipeline
 
+# %%
+ordinal_cols = [
+    "LotShape",
+    "LandContour",
+    "Utilities",
+    "LandSlope",
+    "OverallQual",
+    "OverallCond",
+    "ExterQual",
+    "ExterCond",
+    "BsmtQual",
+    "BsmtCond",
+    "BsmtExposure",
+    "BsmtFinType2",
+    "HeatingQC",
+    "Electrical",
+    "KitchenQual",
+    "Functional",
+    "FireplaceQu",
+    "GarageFinish",
+    "GarageQual",
+    "GarageCond",
+    "PavedDrive",
+    "PoolQC",
+    "Fence"
+]
 
-def fill_missing_values(df):
-    df = df.dropna(subset=["Electrical"]).copy() 
+ordinal_categories = [
 
-    df["LotFrontage"] = df["LotFrontage"].fillna(df["LotFrontage"].median())
+    # LotShape
+    ["IR3", "IR2", "IR1", "Reg"],
 
-    df = df.dropna(subset=["MasVnrArea"]).copy()
+    # LandContour
+    ["Low", "HLS", "Bnk", "Lvl"],
 
-    prob = ["Alley","MasVnrType","FireplaceQu","PoolQC","Fence","MiscFeature"] 
-    for i in prob:
-        df[i] = df[i].fillna("None")
-    
-    no_bsmt = df["TotalBsmtSF"] == 0 
-    bsmt_cat_cols = [
-        "BsmtQual", "BsmtCond", "BsmtExposure",
-        "BsmtFinType1", "BsmtFinType2"
-    ]
-    df.loc[no_bsmt, bsmt_cat_cols] = df.loc[no_bsmt, bsmt_cat_cols].fillna("None")
-    for col in bsmt_cat_cols:
-        df.loc[~no_bsmt & df[col].isna(), col] = \
-            df.loc[~no_bsmt, col].mode()[0]
+    # Utilities
+    ["ELO", "NoSeWa", "NoSewr", "AllPub"],
 
-    bsmt_num_cols = [
-        "BsmtFinSF1", "BsmtFinSF2", "BsmtUnfSF",
-        "TotalBsmtSF", "BsmtFullBath", "BsmtHalfBath"
-    ]
-    df[bsmt_num_cols] = df[bsmt_num_cols].fillna(0)
-    
-    garage_cat_cols = [
-        "GarageType",
-        "GarageFinish",
-        "GarageQual",
-        "GarageCond"
-    ]
-    df[garage_cat_cols] = df[garage_cat_cols].fillna("None")
+    # LandSlope
+    ["Sev", "Mod", "Gtl"],
 
-    return df
+    # OverallQual
+    list(range(1, 11)),
 
-def encode_features(df):
-    df = df.copy()
+    # OverallCond
+    list(range(1, 11)),
 
-    # -------- ORDINAL MAPPINGS -------- #
+    # ExterQual
+    ["Po", "Fa", "TA", "Gd", "Ex"],
 
-    QUAL = {"None": 0, "Po": 1, "Fa": 2, "TA": 3, "Gd": 4, "Ex": 5}
-    EXPOSURE = {"None": 0, "No": 1, "Mn": 2, "Av": 3, "Gd": 4}
-    BSMT_FIN = {"None": 0, "Unf": 1, "LwQ": 2, "Rec": 3, "BLQ": 4, "ALQ": 5, "GLQ": 6}
-    GAR_FIN = {"None": 0, "Unf": 1, "RFn": 2, "Fin": 3}
-    UTIL = {"ELO": 0, "NoSeWa": 1, "NoSewr": 2, "AllPub": 3}
+    # ExterCond
+    ["Po", "Fa", "TA", "Gd", "Ex"],
 
-    ordinal_mappings = {
-        "ExterQual": QUAL,
-        "ExterCond": QUAL,
-        "HeatingQC": QUAL,
-        "KitchenQual": QUAL,
-        "FireplaceQu": QUAL,
-        "GarageQual": QUAL,
-        "GarageCond": QUAL,
-        "BsmtQual": QUAL,
-        "BsmtCond": QUAL,
-        "BsmtExposure": EXPOSURE,
-        "BsmtFinType1": BSMT_FIN,
-        "BsmtFinType2": BSMT_FIN,
-        "GarageFinish": GAR_FIN,
-        "Utilities": UTIL
-    }
+    # BsmtQual
+    ["NA", "Po", "Fa", "TA", "Gd", "Ex"],
 
-    for col, mapping in ordinal_mappings.items():
-        if col in df.columns:
-            df[col] = df[col].map(mapping)
+    # BsmtCond
+    ["NA", "Po", "Fa", "TA", "Gd", "Ex"],
 
-    # -------- NOMINAL ONE-HOT -------- #
+    # BsmtExposure
+    ["NA", "No", "Mn", "Av", "Gd"],
 
-    categorical_cols = df.select_dtypes(include=["object"]).columns
+    # BsmtFinType2
+    ["NA", "Unf", "LwQ", "Rec", "BLQ", "ALQ", "GLQ"],
 
-    df = pd.get_dummies(df, columns=categorical_cols, drop_first=False)
+    # HeatingQC
+    ["Po", "Fa", "TA", "Gd", "Ex"],
 
-    return df
+    # Electrical
+    ["Mix", "FuseP", "FuseF", "FuseA", "SBrkr"],
 
-def fill_missing_values_test(df):
-    df["Electrical"] = df["Electrical"].fillna(df["Electrical"].mode()[0]) 
+    # KitchenQual
+    ["Po", "Fa", "TA", "Gd", "Ex"],
 
-    df["LotFrontage"] = df["LotFrontage"].fillna(df["LotFrontage"].median())
+    # Functional
+    ["Sal", "Sev", "Maj2", "Maj1", "Mod", "Min2", "Min1", "Typ"],
 
-    df["MasVnrArea"] = df["MasVnrArea"].fillna(0)
+    # FireplaceQu
+    ["NA", "Po", "Fa", "TA", "Gd", "Ex"],
 
-    prob = ["Alley","MasVnrType","FireplaceQu","PoolQC","Fence","MiscFeature"] 
-    for i in prob:
-        df[i] = df[i].fillna("None")
-    
-    no_bsmt = df["TotalBsmtSF"] == 0 
-    bsmt_cat_cols = [
-        "BsmtQual", "BsmtCond", "BsmtExposure",
-        "BsmtFinType1", "BsmtFinType2"
-    ]
-    df.loc[no_bsmt, bsmt_cat_cols] = df.loc[no_bsmt, bsmt_cat_cols].fillna("None")
-    for col in bsmt_cat_cols:
-        df.loc[~no_bsmt & df[col].isna(), col] = \
-            df.loc[~no_bsmt, col].mode()[0]
+    # GarageFinish
+    ["NA", "Unf", "RFn", "Fin"],
 
-    bsmt_num_cols = [
-        "BsmtFinSF1", "BsmtFinSF2", "BsmtUnfSF",
-        "TotalBsmtSF", "BsmtFullBath", "BsmtHalfBath"
-    ]
-    df[bsmt_num_cols] = df[bsmt_num_cols].fillna(0)
-    
-    garage_cat_cols = [
-        "GarageType",
-        "GarageFinish",
-        "GarageQual",
-        "GarageCond"
-    ]
-    df[garage_cat_cols] = df[garage_cat_cols].fillna("None")
+    # GarageQual
+    ["NA", "Po", "Fa", "TA", "Gd", "Ex"],
 
-    return df
+    # GarageCond
+    ["NA", "Po", "Fa", "TA", "Gd", "Ex"],
 
+    # PavedDrive
+    ["N", "P", "Y"],
 
+    # PoolQC
+    ["NA", "Fa", "TA", "Gd", "Ex"],
 
+    # Fence
+    ["NA", "MnWw", "GdWo", "MnPrv", "GdPrv"],
+]
+
+# %%
+def preprocessor(X):
+    """
+    Minimal LASSO-friendly preprocessor.
+
+    Assumptions:
+    - ordinal_cols and ordinal_categories come from your existing code
+    - feature engineering already done
+    """
+
+    # ----- detect column types -----
+    cat_cols = X.select_dtypes(include="object").columns.tolist()
+    nominal_cols = [c for c in cat_cols if c not in ordinal_cols]
+
+    num_cols = X.select_dtypes(exclude="object").columns.tolist()
+
+    # ----- split numeric into binary vs continuous -----
+    binary_cols = [c for c in num_cols if X[c].nunique() <= 2]
+    cont_cols = [c for c in num_cols if c not in binary_cols]
+
+    # ----- transformers -----
+    ordinal_enc = OrdinalEncoder(
+        categories=ordinal_categories,
+        handle_unknown="use_encoded_value",
+        unknown_value=-1,
+        encoded_missing_value=-1,
+    )
+
+    nominal_enc = OneHotEncoder(handle_unknown="ignore")
+
+    num_scaler = StandardScaler()
+
+    # ----- column transformer -----
+    ct = ColumnTransformer(
+        transformers=[
+            ("ordinal", ordinal_enc, ordinal_cols),
+            ("nominal", nominal_enc, nominal_cols),
+            ("num_scaled", num_scaler, cont_cols),   # only continuous scaled
+            ("num_binary", "passthrough", binary_cols),
+        ],
+        remainder="passthrough",
+    )
+
+    return ct
