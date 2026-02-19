@@ -13,7 +13,7 @@ This project implements a stacked regression pipeline to predict **SalePrice** u
 
 - Structured ML pipeline (train → save → predict)
 - Feature engineering and preprocessing
-- Stacked ensemble (XGBoost + Lasso / ElasticNet)
+- Stacked ensemble (XGBoost + Lasso)
 - Reproducible predictions
 - Clean project layout for production readiness
 
@@ -21,6 +21,7 @@ This project implements a stacked regression pipeline to predict **SalePrice** u
 
 ## Project Structure
 
+```
 - AMES_HOUSE_PRICES/
 │
 ├── data/ # raw and cleaned datasets
@@ -34,6 +35,7 @@ This project implements a stacked regression pipeline to predict **SalePrice** u
 ├── submissions/ # Kaggle submission files
 ├── README.md
 └── Requirements.txt
+```
 
 ---
 
@@ -80,7 +82,7 @@ This will:
 
 - XGBoost
 - LASSO
-- Stacking Regressor (meta - learner)
+- Stacking Regressor (meta-learner)
 
 ## Goal
 
