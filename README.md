@@ -54,5 +54,42 @@ pip install -r Requirements.txt
 
 ## Training the model
 
+```bash
 python src/train.py
+```
 
+This will:
+
+- preprocess training data
+- train stacked model
+- save model to models/
+
+## Making predictions
+
+```bash
+python src/predict.py
+```
+
+This will:
+
+- load saved model
+- transform test data
+- generate submission file in submissions/
+
+## Models used
+
+- XGBoost
+- LASSO
+- Stacking Regressor (meta - learner)
+
+## Goal
+
+Achieve low RMSE on the Ames Housing Kaggle competition while maintaining:
+
+- clean pipeline design
+- reproducibility
+
+## Author
+
+Anupam Dasgupta
+  
