@@ -16,6 +16,7 @@ This project implements a stacked regression pipeline to predict **SalePrice** u
 - Stacked ensemble (XGBoost + Lasso)
 - Reproducible predictions
 - Clean project layout for production readiness
+- Achieved CV RMSE of 0.11 to 0.12 
 
 ---
 
@@ -83,13 +84,6 @@ This will:
 - XGBoost
 - LASSO
 - Stacking Regressor (meta-learner)
-
-## Goal
-
-Achieve low RMSE on the Ames Housing Kaggle competition while maintaining:
-
-- clean pipeline design
-- reproducibility
 
 ## Author
 
