@@ -105,17 +105,17 @@ ordinal_categories = [
 
 def preprocessor(X):
 
-    # ----- detect column types ----
+    #detect column types
     cat_cols = X.select_dtypes(include="object").columns.tolist()
     nominal_cols = [c for c in cat_cols if c not in ordinal_cols]
 
     num_cols = X.select_dtypes(exclude="object").columns.tolist()
 
-    # ----- split numeric into binary vs continuous -----
+    # split numeric into binary vs continuous
     binary_cols = [c for c in num_cols if X[c].nunique() <= 2]
     cont_cols = [c for c in num_cols if c not in binary_cols]
 
-    # ----- transformers -----
+    # transformers
     ordinal_enc = OrdinalEncoder(
         categories=ordinal_categories,
         handle_unknown="use_encoded_value",
@@ -127,7 +127,7 @@ def preprocessor(X):
 
     num_scaler = StandardScaler()
 
-    # ----- column transformer -----
+    # column transformer
     ct = ColumnTransformer(
         transformers=[
             ("ordinal", ordinal_enc, ordinal_cols),
