@@ -103,17 +103,9 @@ ordinal_categories = [
     ["NA", "MnWw", "GdWo", "MnPrv", "GdPrv"],
 ]
 
-# %%
 def preprocessor(X):
-    """
-    Minimal LASSO-friendly preprocessor.
 
-    Assumptions:
-    - ordinal_cols and ordinal_categories come from your existing code
-    - feature engineering already done
-    """
-
-    # ----- detect column types -----
+    # ----- detect column types ----
     cat_cols = X.select_dtypes(include="object").columns.tolist()
     nominal_cols = [c for c in cat_cols if c not in ordinal_cols]
 
