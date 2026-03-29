@@ -16,7 +16,7 @@ This project implements a stacked regression pipeline to predict **SalePrice** u
 - Stacked ensemble (XGBoost + Lasso)
 - Reproducible predictions
 - Clean project layout for production readiness
-- Achieved CV RMSE of 0.11 to 0.12 
+- Achieved test RMSE of 0.1298
 
 ---
 
@@ -45,7 +45,7 @@ This project implements a stacked regression pipeline to predict **SalePrice** u
 Clone the repository:
 
 ```bash
-git clone https://github.com/Archer-Frost/Ames-Housing-Prices-Project.git
+git clone https://github.com/Anupam-Dasgupta/Ames-Housing-Prices-Project.git
 cd Ames-Housing-Prices-Project
 ```
 
